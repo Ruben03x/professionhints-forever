@@ -1,0 +1,8 @@
+## Interface: 16001
+## Title: Profession Hints Forever
+## Notes: Leveling hints on the WoW Forever profession skill bars.
+## Version: 0.1.0
+## SavedVariables: ProfessionHintsForeverDB
+
+Routes.lua
+ProfessionHintsForever.lua
