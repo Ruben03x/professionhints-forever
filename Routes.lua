@@ -38,6 +38,15 @@ local startingZones = {
 -- The next entry's minimum is the current bracket's target.
 addon.routes = {
     [186] = { -- Mining
+        -- Recommended smelting route. Endpoints below the gray threshold are recipe switches.
+        smelting = {
+            { 1, 65, "Copper" },
+            { 65, 75, "Tin" },
+            { 75, 100, "Bronze" },
+            { 100, 125, "Silver" },
+            { 125, 140, "Iron" },
+            { 155, 185, "Gold" },
+        },
         { 1, "Copper Vein", zones = { zephras, mulgore, barrens, dunMorogh, elwynn } },
         { 65, "Tin Vein", zones = { redridge, ashenvale, barrens, loch, wetlands } },
         { 125, "Iron Deposit", zones = { riverglades, arathi, desolace, stranglethorn, thousand } },

@@ -62,6 +62,32 @@ local function showZones(bracket)
     end
 end
 
+local function showMining(bracket, skill, target, cap, smelting)
+    local step
+    for _, option in ipairs(smelting) do
+        if skill < option[2] then
+            step = option
+            break
+        end
+    end
+
+    local mineTo = math.min(target, cap)
+    if step and skill < step[1] then
+        mineTo = math.min(mineTo, step[1])
+    end
+    GameTooltip:AddLine(("Mine %s to %d"):format(bracket[2], mineTo), 1, 0.82, 0.37)
+    showZones(bracket)
+
+    if not step then
+        GameTooltip:AddLine("Smelting skill-ups end at 185.", 0.8, 0.8, 0.8)
+    elseif skill < step[1] then
+        GameTooltip:AddLine(("Smelt %s unlocks at %d."):format(step[3], step[1]), 0.8, 0.8, 0.8)
+    else
+        GameTooltip:AddLine(("Or smelt %s to %d at a forge."):format(step[3], math.min(step[2], cap)),
+            0.8, 0.8, 0.8)
+    end
+end
+
 local function showHint(bar, id, name, skill, cap)
     local route = addon.routes[id]
     if not route or not skill or not cap or skill < 1 or cap < 1 then
@@ -84,6 +110,8 @@ local function showHint(bar, id, name, skill, cap)
     elseif skill >= cap then
         local unlock = route.unlock and route.unlock[cap]
         GameTooltip:AddLine(unlock or "Train the next rank with a profession trainer.", 0.92, 0.92, 0.92, true)
+    elseif route.smelting then
+        showMining(bracket, skill, target, cap, route.smelting)
     else
         GameTooltip:AddLine(("Next target %d"):format(math.min(target, cap)), 0.7, 0.7, 0.7)
         GameTooltip:AddLine(bracket[2], 1, 0.82, 0.37)
