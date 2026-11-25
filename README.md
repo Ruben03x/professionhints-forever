@@ -1,14 +1,16 @@
 # Profession Hints Forever
 
-Open Professions in WoW Forever and hover over a skill bar to see what to craft or gather next, where to gather, and where to train when you hit a cap. It also works in the crafting window and covers all 12 professions from 1 to 300.
+Open Professions in WoW Forever and hover over a skill bar to see what to craft or gather next, where to gather and where to train when you hit a cap. It also works in the crafting window and covers all 12 professions from 1 to 300.
+
+This is a WIP, and any fixes, optimizations etc is appreciated.
 
 ## In-game demos
 
-**Professions overview** — Hover over a skill bar on the main Professions page.
+**Professions overview**: Hover over a skill bar on the main Professions page.
 
 ![Hovering over skill bars on the main Professions page](docs/professions-overview.gif)
 
-**Crafting windows** — Hover over the skill bar inside a profession’s own window.
+**Crafting windows**: Hover over the skill bar inside a profession’s own window.
 
 ![Hovering over skill bars inside individual crafting windows](docs/crafting-windows.gif)
 
