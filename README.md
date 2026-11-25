@@ -6,16 +6,11 @@ Hover over your skill bar in WoW Forever's Professions overview or in its crafti
 
 Extract the `ProfessionHintsForever` folder into `World of Warcraft/_forever_/Interface/AddOns`, so `ProfessionHintsForever.toc` is directly inside the addon folder. Enable **Profession Hints Forever** in WoW and open Professions.
 
-Mining shows one main node for the current bracket with up to three zones, ordered by recorded spawn count. Herbalism, Skinning, and Fishing use guide-recommended spots. Crafting shows one recommendation with a short alternative where available. The suggestions use base skill, and a skill cap shows how to unlock the next rank.
+Mining shows one main node and up to three zones for the current bracket. Recorded spawn counts inform the base zone rank. Herbalism, Skinning, and Fishing use guide-recommended spots. Crafting shows one recommendation with a short alternative where available. The suggestions use base skill, and a skill cap shows how to unlock the next rank.
 
-## Nearby scores
+## Zone order
 
-By default, zone lists use the bundled order. Run `/profhints distance` to toggle nearby scores. Each score out of 10 is the average of:
-
-- **Rank**. The recommended zones start at 10 points, dropping two points per place.
-- **Proximity**. Your current zone gets 10 points. Elsewhere on the same continent, the score falls from 10 to 0 over 10,000 yards, measured in a straight line to the zone center. Other continents get 0 proximity points.
-
-If map coordinates are unavailable, the tooltip uses the bundled order. This is an approximate distance score. Routes, travel time, and node availability vary.
+Gathering tooltips sort suitable zones nearest first using straight-line distance to the zone center. Your current zone comes first if it fits the bracket. Zones on other continents or without coordinates follow the measurable ones in bundled order. If your position is unavailable, the tooltip uses the bundled order.
 
 ## Data sources
 
