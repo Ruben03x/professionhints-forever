@@ -34,7 +34,8 @@ jobs:
           archive = f"ProfessionHintsForever-{version}.zip"
           subprocess.run([
               "git", "archive", "--format=zip", "--prefix=ProfessionHintsForever/",
-              f"--output={archive}", "HEAD", "ProfessionHintsForever.lua", "ProfessionHintsForever.toc", "Routes.lua", "README.md",
+              f"--output={archive}", "HEAD", "ProfessionHintsForever.lua", "ProfessionHintsForever.toc",
+              "Routes.lua", "LICENSE", "NOTICE",
           ], check=True)
           subprocess.run([
               "gh", "release", "create", tag, archive, "--verify-tag", "--draft",

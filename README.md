@@ -40,3 +40,7 @@ Routes checked against WoW Forever build 1.60.1.71091 and Forever guides on Nove
 - [ForeverArtisan's leveling guides](https://foreverartisan.app/guides/) cover Engineering and supplement Alchemy, Leatherworking, and Tailoring after 225. [Hardcore Helper's Forever guides](https://www.hardcorehelper.com/forever/guides) cover Enchanting.
 - Rank destinations draw from [WoW Professions' Forever trainer guides](https://www.wow-professions.com/forever), [Warcraft Tavern's Forever trainer guide](https://www.warcrafttavern.com/forever/guides/profession-trainers/), and [Wowhead's Forever Fishing guide](https://www.wowhead.com/forever/guide/professions/fishing/overview-leveling).
 - Recipe destinations draw from Forever entry data at [Bind on Forever](https://bindonforever.com/professions), [ForeverDB](https://www.foreverdb.app/), and [Azeroth Wiki](https://azeroth.wiki/forever/).
+
+## License
+
+The original addon code and build scripts are [MIT licensed](LICENSE). See the [scope and credits](NOTICE).
