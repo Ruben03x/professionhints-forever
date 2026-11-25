@@ -6,7 +6,7 @@ local arathi, badlands = 1417, 1418
 local tirisfal, silverpine, western, eastern = 1420, 1421, 1422, 1423
 local hillsbrad, hinterlands, dunMorogh = 1424, 1425, 1426
 local searing, burning, elwynn = 1427, 1428, 1429
-local loch, redridge, stranglethorn = 1432, 1433, 1434
+local duskwood, loch, redridge, stranglethorn = 1431, 1432, 1433, 1434
 local wetlands, teldrassil, darkshore, ashenvale = 1437, 1438, 1439, 1440
 local thousand, stonetalon, desolace = 1441, 1442, 1443
 local feralas, dustwallow, tanaris, azshara = 1444, 1445, 1446, 1447
@@ -22,7 +22,8 @@ addon.zoneNames = {
     [western] = "Western Plaguelands", [eastern] = "Eastern Plaguelands",
     [hillsbrad] = "Hillsbrad Foothills", [hinterlands] = "The Hinterlands", [dunMorogh] = "Dun Morogh",
     [searing] = "Searing Gorge", [burning] = "Burning Steppes", [elwynn] = "Elwynn Forest",
-    [loch] = "Loch Modan", [redridge] = "Redridge Mountains", [stranglethorn] = "Stranglethorn Vale",
+    [duskwood] = "Duskwood", [loch] = "Loch Modan", [redridge] = "Redridge Mountains",
+    [stranglethorn] = "Stranglethorn Vale",
     [wetlands] = "Wetlands", [teldrassil] = "Teldrassil", [darkshore] = "Darkshore", [ashenvale] = "Ashenvale",
     [thousand] = "Thousand Needles", [stonetalon] = "Stonetalon Mountains", [desolace] = "Desolace",
     [feralas] = "Feralas", [dustwallow] = "Dustwallow Marsh", [tanaris] = "Tanaris", [azshara] = "Azshara",
@@ -51,6 +52,9 @@ local bootyBay = { stranglethorn, "Booty Bay" }
 local gadgetzan = { tanaris, "Gadgetzan" }
 local theramore = { dustwallow, "Theramore Isle" }
 local hammerfall = { arathi, "Hammerfall" }
+local magnusFrostwake = {
+    action = "Buy the plans from Magnus Frostwake", location = { western, "Caer Darrow" },
+}
 local firstAidManuals = {
     Alliance = { arathi, "Stromgarde Keep" }, Horde = { dustwallow, "Brackenwall Village" },
 }
@@ -91,7 +95,7 @@ addon.training = {
         [225] = { Alliance = theramore, Horde = { hillsbrad, "Tarren Mill" } },
     },
     [356] = { -- Fishing
-        [75] = { Alliance = { stormwind }, Horde = valleyOfHonor },
+        [75] = { Alliance = { stormwind, "Trade District" }, Horde = valleyOfHonor },
         [150] = { action = "Buy Expert Fishing - The Bass and You", location = bootyBay },
         [225] = { action = "Complete Nat Pagle, Angler Extreme", location = { dustwallow } },
     },
@@ -117,13 +121,13 @@ addon.training = {
 -- Use the game's source for other recipes when it has one.
 addon.recipeSources = {
     ["Lesser Mana Potion"] = addon.training[171][150],
-    ["Coarse Grinding Stone"] = addon.training[164][150],
+    ["Ebon Shiv"] = magnusFrostwake,
+    ["Ornate Thorium Handaxe"] = magnusFrostwake,
+    ["Bold Dirk"] = { action = "Buy the plans from Pexmit", location = { hyjal } },
     ["Flying Tiger Goggles"] = addon.training[202][150],
     ["Heavy Blasting Powder"] = addon.training[202][150],
     ["Mageweave Bag"] = addon.training[197][150],
-    ["Argent Shoulders"] = {
-        action = "Buy the pattern at Argent Dawn Revered", location = { eastern, "Light's Hope Chapel" },
-    },
+    ["Wizardweave Turban"] = { action = "Look for the pattern at the auction house" },
     ["Minor Wizard Oil"] = { action = "Buy the formula", Alliance = mageQuarter, Horde = theDrag },
     ["Heavy Linen Bandage"] = addon.training[129][75],
     ["Wool Bandage"] = addon.training[129][75],
@@ -142,7 +146,7 @@ addon.recipeSources = {
     ["Tender Wolf Steak"] = { action = "Buy the recipe", location = gadgetzan },
 }
 
--- Entries are {minimum skill, action or node, zones = ..., alternative = ...}.
+-- Entries start with the minimum skill and recommended craft, node, or action.
 -- The next entry's minimum is the current bracket's target.
 addon.routes = {
     [186] = { -- Mining
@@ -157,10 +161,10 @@ addon.routes = {
         },
         { 1, "Copper Vein", zones = { zephras, mulgore, barrens, dunMorogh, elwynn } },
         { 65, "Tin Vein", zones = { redridge, ashenvale, barrens, loch, wetlands } },
-        { 125, "Iron Deposit", zones = { riverglades, arathi, desolace, stranglethorn, thousand } },
+        { 125, "Iron Deposit", zones = { riverglades, arathi, desolace, stranglethorn, thousand, duskwood } },
         { 175, "Mithril Deposit", zones = { hinterlands, tanaris, azshara, desolace, badlands } },
         { 245, "Small Thorium Vein", zones = { ungoro, silithus, burning, winterspring } },
-        { 275, "Rich Thorium Vein", zones = { winterspring, eastern, azshara, hyjal, burning } },
+        { 275, "Rich Thorium Vein", zones = { winterspring, eastern, azshara, silithus, burning } },
     },
     [182] = { -- Herbalism
         gatherAction = "Gather ",
@@ -197,12 +201,8 @@ addon.routes = {
         { 275, "level 55 beasts", zones = { western, winterspring } },
     },
     [356] = { -- Fishing
-        { 1, "Fish in starter-zone waters", zones = startingZones },
-        { 75, "Fish in low-level waters", zones = {
-            Alliance = { loch, darkshore, elwynn }, Horde = { barrens, silverpine, mulgore }, loch, barrens,
-        } },
-        { 150, "Fish with a lure", zones = { dustwallow, stranglethorn }, alternative = "Stay in starter-zone waters." },
-        { 225, "Fish in open water", zones = { dustwallow, tanaris, feralas }, alternative = "Use a lure in Tanaris or Feralas." },
+        { 1, "Fish in starter-zone waters", zones = startingZones, tip = "Use a Shiny Bauble if fish get away." },
+        { 25, "Fish in starter-zone waters", zones = startingZones },
     },
     [171] = { -- Alchemy
         { 1, "Minor Arcane Elixir" },
@@ -220,51 +220,53 @@ addon.routes = {
         { 263, "Draught of Detect Demon" },
         { 292, "Superior Mana Potion" },
     },
-    [164] = { -- Blacksmithing
+    [164] = { -- Blacksmithing (Wowhead's Tried & Tested in Forever route)
         { 1, "Rough Sharpening Stone" },
-        { 25, "Rough Grinding Stone" },
-        { 50, "Coarse Grinding Stone" },
-        { 67, "Runed Copper Gauntlets" },
-        { 75, "Runed Copper Belt", alternative = { "Silver Skeleton Key", "if silver is cheaper" } },
+        { 30, "Rough Grinding Stone" },
+        { 65, "Copper Chain Belt" },
+        { 75, "Silver Skeleton Key" },
         { 80, "Rough Bronze Leggings" },
-        { 95, "Patterned Bronze Bracers" },
-        { 100, "Heavy Grinding Stone" },
-        { 112, "Patterned Bronze Bracers" },
-        { 125, "Bronze Warhammer" },
+        { 90, "Runed Copper Belt" },
+        { 100, "Heavy Sharpening Stone" },
+        { 105, "Runed Copper Belt" },
+        { 110, "Rough Bronze Leggings" },
+        { 125, "Iron Buckle" },
+        { 129, "Bronze Warhammer" },
+        { 140, "Patterned Bronze Bracers" },
+        { 147, "Green Iron Bracers" },
+        { 155, "Green Iron Leggings" },
         { 165, "Green Iron Bracers" },
-        { 175, "Golden Scale Bracers" },
-        { 185, "Heavy Mithril Gauntlet" },
-        { 200, "Mithril Plate Pants" },
+        { 183, "Heavy Mithril Gauntlet" },
+        { 190, "Golden Scale Bracers" },
+        { 200, "Heavy Mithril Gauntlet" },
+        { 205, "Mithril Plate Pants" },
+        { 210, "Heavy Mithril Gauntlet" },
         { 215, "Heavy Mithril Breastplate" },
-        { 225, "Dense Sharpening Stone" },
-        { 232, "Heavy Mithril Boots" },
-        { 245, "Thorium Greatsword" },
-        { 260, "Ornate Thorium Handaxe" },
-        { 275, "Bold Dirk" },
+        { 225, "Dense Weightstone" },
+        { 235, "Mithril Coif" },
+        { 240, "Heavy Mithril Boots" },
+        { 246, "Big Black Mace" },
+        { 250, "Arcanite Skeleton Key" },
+        { 257, "Ebon Shiv" },
+        { 270, "Bold Dirk" },
+        { 275, "Ornate Thorium Handaxe" },
+        { 279, "Bold Dirk" },
     },
     [333] = { -- Enchanting
         { 1, "Disenchant uncommon gear" },
-        { 5, "Runed Copper Rod" },
-        { 6, "Minor Wizard Oil" },
+        { 5, "Minor Wizard Oil", rod = "Runed Copper Rod" },
         { 15, "Enchant Chest - Inferior Stamina" },
         { 70, "Enchant Chest - Minor Absorption" },
         { 90, "Enchant Cloak - Minor Protection" },
         { 110, "Enchant Shield - Minor Stamina" },
-        { 130, "Runed Silver Rod" },
-        { 131, "Enchant Bracer - Lesser Stamina" },
-        { 160, "Enchant Boots - Lesser Agility" },
-        { 175, "Runed Golden Rod" },
-        { 176, "Enchant Boots - Lesser Agility" },
+        { 130, "Enchant Bracer - Lesser Stamina", rod = "Runed Silver Rod" },
+        { 175, "Enchant Boots - Lesser Agility", rod = "Runed Golden Rod" },
         { 180, "Enchant Bracer - Strength" },
-        { 205, "Enchant Cloak - Greater Defense" },
-        { 220, "Runed Truesilver Rod" },
-        { 221, "Enchant Gloves - Agility" },
+        { 220, "Enchant Cloak - Greater Defense", rod = "Runed Truesilver Rod" },
         { 230, "Enchant Chest - Superior Intellect" },
         { 250, "Enchant Bracer - Greater Strength" },
         { 265, "Enchant Shield - Greater Stamina" },
         { 285, "Enchant Cloak - Superior Defense" },
-        { 290, "Runed Arcanite Rod" },
-        { 291, "Enchant Cloak - Superior Defense" },
     },
     [202] = { -- Engineering
         { 1, "Rough Blasting Powder" },
@@ -321,11 +323,11 @@ addon.routes = {
         { 150, "Crimson Silk Vest" },
         { 170, "Crimson Silk Pantaloons" },
         { 190, "Black Mageweave Gloves" },
-        { 215, "Mageweave Bag", alternative = { "Runecloth Belt", "if you have Runecloth" } },
+        { 215, "Mageweave Bag" },
         { 225, "Runecloth Belt" },
         { 235, "Runecloth Cloak" },
         { 250, "Runecloth Cuffs" },
-        { 291, "Argent Shoulders" },
+        { 290, "Wizardweave Turban", alternative = { "Mooncloth Robe", "if you have Mooncloth" } },
     },
     [185] = { -- Cooking
         { 1, "Roasted Boar Meat", alternative = { "Charred Wolf Meat" } },

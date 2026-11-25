@@ -141,6 +141,9 @@ local function showCrafting(bracket, skill, target, inCraftingPage)
 
     GameTooltip:AddLine(("Next target %d"):format(target), 0.7, 0.7, 0.7)
     GameTooltip:AddLine(name, 1, 0.82, 0.37)
+    if bracket.rod then
+        GameTooltip:AddLine(("Make a %s if you need one."):format(bracket.rod), 0.8, 0.8, 0.8, true)
+    end
 
     local recipe, other
     if inCraftingPage then
@@ -198,8 +201,8 @@ local function showHint(bar, id, name, skill, cap, inCraftingPage)
         local action = route.gatherAction or ""
         GameTooltip:AddLine(("%s%s to %d"):format(action, bracket[2], math.min(target, cap)), 1, 0.82, 0.37)
         showZones(bracket)
-        if bracket.alternative then
-            GameTooltip:AddLine("Alternative · " .. bracket.alternative, 0.8, 0.8, 0.8, true)
+        if bracket.tip then
+            GameTooltip:AddLine(bracket.tip, 0.8, 0.8, 0.8, true)
         end
     else
         showCrafting(bracket, skill, math.min(target, cap), inCraftingPage)
