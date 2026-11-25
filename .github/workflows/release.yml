@@ -1,0 +1,42 @@
+name: Package addon
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Package addon and draft release
+        shell: python
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          import os
+          import subprocess
+          from pathlib import Path
+
+          tag = os.environ["GITHUB_REF_NAME"]
+          prefix = "## Version: "
+          toc = Path("ProfessionHintsForever.toc").read_text(encoding="utf-8")
+          version = next((line.removeprefix(prefix).strip()
+                          for line in toc.splitlines() if line.startswith(prefix)), "")
+          if not version or tag != f"v{version}":
+              raise SystemExit("The tag must match the version in ProfessionHintsForever.toc.")
+
+          archive = f"ProfessionHintsForever-{version}.zip"
+          subprocess.run([
+              "git", "archive", "--format=zip", "--prefix=ProfessionHintsForever/",
+              f"--output={archive}", "HEAD", "ProfessionHintsForever.lua", "ProfessionHintsForever.toc", "Routes.lua", "README.md",
+          ], check=True)
+          subprocess.run([
+              "gh", "release", "create", tag, archive, "--verify-tag", "--draft",
+              "--generate-notes", "--title", f"Profession Hints Forever {tag}",
+          ], check=True)
