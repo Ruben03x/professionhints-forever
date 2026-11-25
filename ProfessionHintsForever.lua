@@ -11,6 +11,24 @@ local function getBracket(route, skill)
     end
 end
 
+local function mapName(mapID)
+    local map = C_Map.GetMapInfo(mapID)
+    return map and map.name or addon.zoneNames[mapID]
+end
+
+local function locationHint(entry, action)
+    local location = entry and (entry[UnitFactionGroup("player")] or entry.location)
+    if not location then
+        return action .. "."
+    end
+
+    local name = mapName(location[1])
+    if location[2] then
+        name = location[2] .. ", " .. name
+    end
+    return ("%s in %s."):format(action, name)
+end
+
 local function orderZones(zones)
     local playerMap = C_Map.GetBestMapForUnit("player")
     local playerPosition = playerMap and C_Map.GetPlayerMapPosition(playerMap, "player")
@@ -56,9 +74,7 @@ local function showZones(bracket)
     end
     for index = 1, math.min(#zones, MAX_ZONES) do
         local mapID = ordered and ordered[index].mapID or zones[index]
-        local map = C_Map.GetMapInfo(mapID)
-        local name = map and map.name or addon.zoneNames[mapID]
-        GameTooltip:AddLine(name, 0.92, 0.92, 0.92)
+        GameTooltip:AddLine(mapName(mapID), 0.92, 0.92, 0.92)
     end
 end
 
@@ -88,7 +104,70 @@ local function showMining(bracket, skill, target, cap, smelting)
     end
 end
 
-local function showHint(bar, id, name, skill, cap)
+local function findRecipes(name, alternativeName)
+    local trade = C_TradeSkillUI
+    if not trade or not trade.GetAllRecipeIDs or not trade.GetRecipeInfo
+        or (trade.IsTradeSkillReady and not trade.IsTradeSkillReady())
+        or (trade.IsTradeSkillLinked and trade.IsTradeSkillLinked())
+        or (trade.IsTradeSkillGuild and trade.IsTradeSkillGuild())
+        or (trade.IsNPCCrafting and trade.IsNPCCrafting()) then
+        return
+    end
+
+    local primary, alternative
+    for _, recipeID in ipairs(trade.GetAllRecipeIDs() or {}) do
+        local recipe = trade.GetRecipeInfo(recipeID)
+        if recipe and recipe.name == name then
+            if not primary or recipe.learned then
+                primary = recipe
+            end
+        elseif recipe and recipe.name == alternativeName then
+            if not alternative or recipe.learned then
+                alternative = recipe
+            end
+        end
+        if primary and primary.learned and (not alternativeName or (alternative and alternative.learned)) then
+            break
+        end
+    end
+    return primary, alternative
+end
+
+local function showCrafting(bracket, skill, target, inCraftingPage)
+    local name, alternative = bracket[2], bracket.alternative
+    if alternative and alternative.from and skill < alternative.from then
+        alternative = nil
+    end
+
+    GameTooltip:AddLine(("Next target %d"):format(target), 0.7, 0.7, 0.7)
+    GameTooltip:AddLine(name, 1, 0.82, 0.37)
+
+    local recipe, other
+    if inCraftingPage then
+        recipe, other = findRecipes(name, alternative and alternative[1])
+    end
+
+    local unlearned = recipe and recipe.learned == false
+    if unlearned then
+        local entry = addon.recipeSources[name]
+        local source
+        if entry then
+            source = locationHint(entry, entry.action or "Learn it from a trainer")
+        elseif C_TradeSkillUI.GetRecipeSourceText then
+            local sourceText = C_TradeSkillUI.GetRecipeSourceText(recipe.recipeID)
+            source = sourceText and sourceText:match("[^\r\n]*%S[^\r\n]*")
+        end
+        GameTooltip:AddLine(source or "Recipe unlearned.", 0.8, 0.8, 0.8, true)
+    end
+
+    local alternateLearned = other and other.learned
+    if alternative and (alternateLearned == true or (not unlearned and alternateLearned ~= false)) then
+        local note = alternative[2] and (" " .. alternative[2]) or ""
+        GameTooltip:AddLine(("Alternative · %s%s."):format(alternative[1], note), 0.8, 0.8, 0.8, true)
+    end
+end
+
+local function showHint(bar, id, name, skill, cap, inCraftingPage)
     local route = addon.routes[id]
     if not route or not skill or not cap or skill < 1 or cap < 1 then
         return
@@ -108,19 +187,22 @@ local function showHint(bar, id, name, skill, cap)
     if skill >= MAX_SKILL then
         GameTooltip:AddLine("Maximum skill reached.", 0.92, 0.92, 0.92)
     elseif skill >= cap then
-        local unlock = route.unlock and route.unlock[cap]
-        GameTooltip:AddLine(unlock or "Train the next rank with a profession trainer.", 0.92, 0.92, 0.92, true)
+        local training = addon.training[id]
+        local entry = training[cap] or training.allRanks
+        local action = entry and entry.action
+        local hint = locationHint(entry, action or "Train the next rank")
+        GameTooltip:AddLine(hint, 0.92, 0.92, 0.92, true)
     elseif route.smelting then
         showMining(bracket, skill, target, cap, route.smelting)
-    else
-        GameTooltip:AddLine(("Next target %d"):format(math.min(target, cap)), 0.7, 0.7, 0.7)
-        GameTooltip:AddLine(bracket[2], 1, 0.82, 0.37)
-        if bracket.zones then
-            showZones(bracket)
-        end
+    elseif bracket.zones then
+        local action = route.gatherAction or ""
+        GameTooltip:AddLine(("%s%s to %d"):format(action, bracket[2], math.min(target, cap)), 1, 0.82, 0.37)
+        showZones(bracket)
         if bracket.alternative then
             GameTooltip:AddLine("Alternative · " .. bracket.alternative, 0.8, 0.8, 0.8, true)
         end
+    else
+        showCrafting(bracket, skill, math.min(target, cap), inCraftingPage)
     end
     GameTooltip:Show()
 end
@@ -155,7 +237,9 @@ end
 
 local function readCraftingSkill()
     local info = Professions.GetProfessionInfo()
-    return info.parentProfessionID or info.professionID, info.displayName, info.skillLevel, info.maxSkillLevel
+    if info then
+        return info.parentProfessionID or info.professionID, info.displayName, info.skillLevel, info.maxSkillLevel, true
+    end
 end
 
 local function hookProfessions()

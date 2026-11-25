@@ -11,6 +11,8 @@ local wetlands, teldrassil, darkshore, ashenvale = 1437, 1438, 1439, 1440
 local thousand, stonetalon, desolace = 1441, 1442, 1443
 local feralas, dustwallow, tanaris, azshara = 1444, 1445, 1446, 1447
 local felwood, ungoro, silithus, winterspring = 1448, 1449, 1451, 1452
+local stormwind, orgrimmar, ironforge, thunderBluff, darnassus, undercity = 1453, 1454, 1455, 1456, 1457, 1458
+local swampOfSorrows = 1435
 local hyjal, zephras, riverglades = 2482, 2521, 2548
 
 addon.zoneNames = {
@@ -25,6 +27,9 @@ addon.zoneNames = {
     [thousand] = "Thousand Needles", [stonetalon] = "Stonetalon Mountains", [desolace] = "Desolace",
     [feralas] = "Feralas", [dustwallow] = "Dustwallow Marsh", [tanaris] = "Tanaris", [azshara] = "Azshara",
     [felwood] = "Felwood", [ungoro] = "Un'Goro Crater", [silithus] = "Silithus", [winterspring] = "Winterspring",
+    [stormwind] = "Stormwind City", [orgrimmar] = "Orgrimmar", [ironforge] = "Ironforge",
+    [thunderBluff] = "Thunder Bluff", [darnassus] = "Darnassus", [undercity] = "Undercity",
+    [swampOfSorrows] = "Swamp of Sorrows",
     [hyjal] = "Mount Hyjal", [zephras] = "Zephras Isle", [riverglades] = "Riverglades",
 }
 
@@ -32,6 +37,109 @@ local startingZones = {
     Alliance = { elwynn, dunMorogh, teldrassil, zephras },
     Horde = { durotar, mulgore, tirisfal, zephras },
     zephras,
+}
+
+local dwarvenDistrict = { stormwind, "Dwarven District" }
+local mageQuarter = { stormwind, "Mage Quarter" }
+local oldTown = { stormwind, "Old Town" }
+local valleyOfHonor = { orgrimmar, "Valley of Honor" }
+local theDrag = { orgrimmar, "The Drag" }
+local theGreatForge = { ironforge, "The Great Forge" }
+local tinkerTown = { ironforge, "Tinker Town" }
+local craftsmensTerrace = { darnassus, "Craftsmen's Terrace" }
+local bootyBay = { stranglethorn, "Booty Bay" }
+local gadgetzan = { tanaris, "Gadgetzan" }
+local theramore = { dustwallow, "Theramore Isle" }
+local hammerfall = { arathi, "Hammerfall" }
+local firstAidManuals = {
+    Alliance = { arathi, "Stromgarde Keep" }, Horde = { dustwallow, "Brackenwall Village" },
+}
+
+-- One suggested destination per faction and current rank cap.
+addon.training = {
+    [186] = { allRanks = { Alliance = dwarvenDistrict, Horde = valleyOfHonor } },
+    [182] = { allRanks = { Alliance = mageQuarter, Horde = theDrag } },
+    [393] = { allRanks = { Alliance = oldTown, Horde = theDrag } },
+    [171] = { -- Alchemy
+        [75] = { Alliance = mageQuarter, Horde = theDrag },
+        [150] = { Alliance = craftsmensTerrace, Horde = { undercity, "The Apothecarium" } },
+        [225] = { Alliance = { feralas, "Feathermoon Stronghold" }, Horde = { swampOfSorrows, "Stonard" } },
+    },
+    [164] = { -- Blacksmithing
+        [75] = { Alliance = dwarvenDistrict, Horde = valleyOfHonor },
+        [150] = { Alliance = theGreatForge, Horde = valleyOfHonor },
+        [225] = { location = bootyBay },
+    },
+    [333] = { -- Enchanting
+        [75] = { Alliance = mageQuarter, Horde = theDrag },
+        [150] = { Alliance = { elwynn, "Tower of Azora" }, Horde = { stonetalon, "Sun Rock Retreat" } },
+        [225] = { action = "Train the next rank from Annora", location = { badlands, "Uldaman" } },
+    },
+    [202] = { -- Engineering
+        [75] = { Alliance = tinkerTown, Horde = valleyOfHonor },
+        [150] = { Alliance = tinkerTown, Horde = valleyOfHonor },
+        [225] = { location = gadgetzan },
+    },
+    [165] = { -- Leatherworking
+        [75] = { Alliance = oldTown, Horde = theDrag },
+        [150] = { Alliance = craftsmensTerrace, Horde = { thunderBluff, "Middle Rise" } },
+        [225] = { Alliance = { hinterlands, "Aerie Peak" }, Horde = { feralas, "Camp Mojache" } },
+    },
+    [197] = { -- Tailoring
+        [75] = { Alliance = mageQuarter, Horde = theDrag },
+        [150] = { Alliance = mageQuarter, Horde = { undercity, "Magic Quarter" } },
+        [225] = { Alliance = theramore, Horde = { hillsbrad, "Tarren Mill" } },
+    },
+    [356] = { -- Fishing
+        [75] = { Alliance = { stormwind }, Horde = valleyOfHonor },
+        [150] = { action = "Buy Expert Fishing - The Bass and You", location = bootyBay },
+        [225] = { action = "Complete Nat Pagle, Angler Extreme", location = { dustwallow } },
+    },
+    [185] = { -- Cooking
+        [75] = { Alliance = oldTown, Horde = theDrag },
+        [150] = {
+            action = "Buy Expert Cookbook",
+            Alliance = { ashenvale, "Silverwind Refuge" }, Horde = { desolace, "Shadowprey Village" },
+        },
+        [225] = { action = "Complete Clamlette Surprise", location = gadgetzan },
+    },
+    [129] = { -- First Aid
+        [75] = { Alliance = { stormwind, "Cathedral Square" }, Horde = { orgrimmar, "Valley of Spirits" } },
+        [150] = {
+            action = "Buy Expert First Aid - Under Wraps", Alliance = firstAidManuals.Alliance,
+            Horde = firstAidManuals.Horde,
+        },
+        [225] = { action = "Complete Triage", Alliance = theramore, Horde = hammerfall },
+    },
+}
+
+-- Verified destinations for common trainer recipes and a few recipes with special sources.
+-- Use the game's source for other recipes when it has one.
+addon.recipeSources = {
+    ["Lesser Mana Potion"] = addon.training[171][150],
+    ["Coarse Grinding Stone"] = addon.training[164][150],
+    ["Flying Tiger Goggles"] = addon.training[202][150],
+    ["Heavy Blasting Powder"] = addon.training[202][150],
+    ["Mageweave Bag"] = addon.training[197][150],
+    ["Argent Shoulders"] = {
+        action = "Buy the pattern at Argent Dawn Revered", location = { eastern, "Light's Hope Chapel" },
+    },
+    ["Minor Wizard Oil"] = { action = "Buy the formula", Alliance = mageQuarter, Horde = theDrag },
+    ["Heavy Linen Bandage"] = addon.training[129][75],
+    ["Wool Bandage"] = addon.training[129][75],
+    ["Heavy Wool Bandage"] = addon.training[129][75],
+    ["Silk Bandage"] = addon.training[129][75],
+    ["Heavy Silk Bandage"] = {
+        action = "Buy the manual", Alliance = firstAidManuals.Alliance, Horde = firstAidManuals.Horde,
+    },
+    ["Mageweave Bandage"] = {
+        action = "Buy the manual", Alliance = firstAidManuals.Alliance, Horde = firstAidManuals.Horde,
+    },
+    ["Coyote Steak"] = addon.training[185][75],
+    ["Dry Pork Ribs"] = addon.training[185][75],
+    ["Curiously Tasty Omelet"] = { action = "Buy the recipe", Alliance = oldTown, Horde = hammerfall },
+    ["Roast Raptor"] = { action = "Buy the recipe", Alliance = { arathi, "Refuge Pointe" }, Horde = hammerfall },
+    ["Tender Wolf Steak"] = { action = "Buy the recipe", location = gadgetzan },
 }
 
 -- Entries are {minimum skill, action or node, zones = ..., alternative = ...}.
@@ -55,6 +163,7 @@ addon.routes = {
         { 275, "Rich Thorium Vein", zones = { winterspring, eastern, azshara, hyjal, burning } },
     },
     [182] = { -- Herbalism
+        gatherAction = "Gather ",
         { 1, "Peacebloom / Silverleaf", zones = startingZones },
         { 70, "Mageroyal / Briarthorn", zones = {
             Alliance = { darkshore, loch }, Horde = { barrens, silverpine }, darkshore, silverpine,
@@ -68,26 +177,26 @@ addon.routes = {
         { 270, "Dreamfoil", zones = { eastern, felwood } },
     },
     [393] = { -- Skinning
-        { 1, "Starter-zone beasts", zones = startingZones },
-        { 75, "Level 16–17 beasts", zones = {
+        gatherAction = "Skin ",
+        { 1, "starter-zone beasts", zones = startingZones },
+        { 75, "level 16-17 beasts", zones = {
             Alliance = { loch }, Horde = { barrens }, barrens, loch,
         } },
-        { 125, "Level 25 beasts", zones = {
+        { 125, "level 25 beasts", zones = {
             Alliance = { wetlands, hillsbrad }, Horde = { hillsbrad, wetlands }, hillsbrad, wetlands,
         } },
-        { 150, "Level 30 beasts", zones = {
+        { 150, "level 30 beasts", zones = {
             Alliance = { arathi, thousand }, Horde = { thousand, arathi }, arathi, thousand,
         } },
-        { 185, "Level 37 beasts", zones = {
+        { 185, "level 37 beasts", zones = {
             Alliance = { stranglethorn, badlands, dustwallow }, Horde = { dustwallow, badlands, stranglethorn },
             stranglethorn, badlands, dustwallow,
         } },
-        { 225, "Beasts up to level 45", zones = { tanaris, feralas } },
-        { 250, "Level 50 beasts", zones = { ungoro, felwood } },
-        { 275, "Level 55 beasts", zones = { western, winterspring } },
+        { 225, "level 45 beasts", zones = { tanaris, feralas } },
+        { 250, "level 50 beasts", zones = { ungoro, felwood } },
+        { 275, "level 55 beasts", zones = { western, winterspring } },
     },
     [356] = { -- Fishing
-        unlock = { [150] = "Read Expert Fishing - The Bass and You.", [225] = "Complete Nat Pagle's fishing quest." },
         { 1, "Fish in starter-zone waters", zones = startingZones },
         { 75, "Fish in low-level waters", zones = {
             Alliance = { loch, darkshore, elwynn }, Horde = { barrens, silverpine, mulgore }, loch, barrens,
@@ -98,7 +207,7 @@ addon.routes = {
     [171] = { -- Alchemy
         { 1, "Minor Arcane Elixir" },
         { 10, "Elixir of Minor Defense" },
-        { 25, "Elixir of Minor Defense", alternative = "Minor Mana Potion if Mageroyal is cheaper." },
+        { 25, "Elixir of Minor Defense", alternative = { "Minor Mana Potion", "if Mageroyal is cheaper" } },
         { 55, "Minor Mana Potion" },
         { 65, "Elixir of Minor Fortitude" },
         { 90, "Elixir of Wisdom" },
@@ -106,7 +215,7 @@ addon.routes = {
         { 160, "Mana Potion" },
         { 185, "Elixir of Agility" },
         { 205, "Greater Mana Potion" },
-        { 225, "Greater Mana Potion", alternative = "Fire Protection Potion if you have the recipe." },
+        { 225, "Greater Mana Potion", alternative = { "Fire Protection Potion" } },
         { 230, "Draught of Detect Undead" },
         { 263, "Draught of Detect Demon" },
         { 292, "Superior Mana Potion" },
@@ -116,7 +225,7 @@ addon.routes = {
         { 25, "Rough Grinding Stone" },
         { 50, "Coarse Grinding Stone" },
         { 67, "Runed Copper Gauntlets" },
-        { 75, "Runed Copper Belt", alternative = "Silver Skeleton Key if silver is cheaper." },
+        { 75, "Runed Copper Belt", alternative = { "Silver Skeleton Key", "if silver is cheaper" } },
         { 80, "Rough Bronze Leggings" },
         { 95, "Patterned Bronze Bracers" },
         { 100, "Heavy Grinding Stone" },
@@ -166,7 +275,7 @@ addon.routes = {
         { 75, "Coarse Blasting Powder" },
         { 92, "Coarse Dynamite" },
         { 100, "Flying Tiger Goggles" },
-        { 125, "Heavy Blasting Powder", alternative = "Keep making Flying Tiger Goggles." },
+        { 125, "Heavy Blasting Powder", alternative = { "Flying Tiger Goggles" } },
         { 136, "Flying Tiger Goggles" },
         { 150, "Aquadynamic Fish Attractor" },
         { 157, "Bronze Framework" },
@@ -180,7 +289,7 @@ addon.routes = {
         { 285, "Delicate Arcanite Converter" },
     },
     [165] = { -- Leatherworking
-        { 1, "Light Armor Kit", alternative = "Make Light Leather if you have scraps." },
+        { 1, "Light Armor Kit", alternative = { "Light Leather", "if you have scraps" } },
         { 30, "Cured Light Hide" },
         { 55, "Embossed Leather Gloves" },
         { 75, "Medium Leather" },
@@ -190,8 +299,8 @@ addon.routes = {
         { 115, "Dark Leather Belt" },
         { 125, "Heavy Leather" },
         { 130, "Heavy Armor Kit" },
-        { 155, "Barbaric Shoulders", alternative = "Dusky Bracers from 160 if hides are expensive." },
-        { 165, "Guardian Gloves", alternative = "Dusky Bracers if hides are expensive." },
+        { 155, "Barbaric Shoulders", alternative = { "Dusky Bracers", "if hides are expensive", from = 160 } },
+        { 165, "Guardian Gloves", alternative = { "Dusky Bracers", "if hides are expensive" } },
         { 175, "Thick Armor Kit" },
         { 195, "Nightscape Headband" },
         { 210, "Nightscape Pants" },
@@ -212,23 +321,21 @@ addon.routes = {
         { 150, "Crimson Silk Vest" },
         { 170, "Crimson Silk Pantaloons" },
         { 190, "Black Mageweave Gloves" },
-        { 215, "Mageweave Bag", alternative = "Runecloth Belt if you have Runecloth." },
+        { 215, "Mageweave Bag", alternative = { "Runecloth Belt", "if you have Runecloth" } },
         { 225, "Runecloth Belt" },
         { 235, "Runecloth Cloak" },
         { 250, "Runecloth Cuffs" },
         { 291, "Argent Shoulders" },
     },
     [185] = { -- Cooking
-        unlock = { [150] = "Read the Expert Cookbook.", [225] = "Complete Clamlette Surprise in Gadgetzan." },
-        { 1, "Roasted Boar Meat", alternative = "Charred Wolf Meat." },
-        { 50, "Coyote Steak", alternative = "Boiled Clams." },
+        { 1, "Roasted Boar Meat", alternative = { "Charred Wolf Meat" } },
+        { 50, "Coyote Steak", alternative = { "Boiled Clams" } },
         { 90, "Dry Pork Ribs" },
         { 130, "Curiously Tasty Omelet" },
         { 175, "Roast Raptor" },
-        { 225, "Tender Wolf Steak", alternative = "Monster Omelet if Giant Eggs are cheaper." },
+        { 225, "Tender Wolf Steak", alternative = { "Monster Omelet", "if Giant Eggs are cheaper" } },
     },
     [129] = { -- First Aid
-        unlock = { [150] = "Read Expert First Aid - Under Wraps.", [225] = "Complete Triage." },
         { 1, "Linen Bandage" },
         { 40, "Heavy Linen Bandage" },
         { 80, "Wool Bandage" },
