@@ -34,7 +34,13 @@ Small updates are welcome. You can change a single recipe, add a gathering zone,
 
 1. Open [Routes.lua](Routes.lua) on GitHub, click the pencil icon, and follow the prompts to fork the repo. You can make the edit in your browser.
 2. Find the profession by its name in the comments under `addon.routes`. Edit an existing row or insert a row to add a new breakpoint. Keep rows in ascending skill order. The first number is the skill at which the hint starts. The next row sets the switch point, and the last row targets 300.
-3. Click **Propose changes** and open a pull request against `main`. Include the profession, affected skill range, what changed, and how you checked it. An in-game screenshot or a link to a WoW Forever source helps reviewers verify the change.
+3. Click **Propose changes** and open a pull request against `main`. Follow the [pull request template](.github/pull_request_template.md).
+
+### Pull request format
+
+- **Problem** — Describe what is wrong or missing. For route changes, include the profession and affected skill range.
+- **Solution** — Describe what you changed. Link to a WoW Forever source if it supports the change.
+- **In-game testing proof (if required)** — For changes that affect what players see in game, describe what you tested and attach a screenshot or short clip. If you couldn't test in game, say so. For changes that don't affect the game, enter `N/A`.
 
 ### Route examples
 
@@ -55,7 +61,7 @@ Recipe locations live in `addon.recipeSources`. Rank-cap destinations live in `a
 
 ### Test in WoW Forever
 
-Copy `ProfessionHintsForever.toc`, `Routes.lua`, and `ProfessionHintsForever.lua` from your edited branch into `_forever_/Interface/AddOns/ProfessionHintsForever`. In game, run `/reload` and hover over the profession skill bar. If you have a character near a changed breakpoint, check both sides of the switch. For recipe changes, also check the profession's own crafting window. In your pull request, mention what you were able to test.
+Copy `ProfessionHintsForever.toc`, `Routes.lua`, and `ProfessionHintsForever.lua` from your edited branch into `_forever_/Interface/AddOns/ProfessionHintsForever`. In game, run `/reload` and hover over the profession skill bar. If you have a character near a changed breakpoint, check both sides of the switch. For recipe changes, also check the profession's own crafting window.
 
 You can also [open an issue](https://github.com/Ruben03x/professionhints-forever/issues/new) with the profession, your skill level, the current hint, and what you expected to see.
 
