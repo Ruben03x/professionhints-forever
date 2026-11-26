@@ -2,6 +2,8 @@ local _, addon = ...
 local MAX_SKILL, MAX_ZONES = 300, 3
 local hooked = {}
 
+-- Find the active row in a profession's route. The next row's starting skill is
+-- the target. The last row targets MAX_SKILL.
 local function getBracket(route, skill)
     for index = #route, 1, -1 do
         if skill >= route[index][1] then
@@ -11,11 +13,13 @@ local function getBracket(route, skill)
     end
 end
 
+-- Use the game's map name when available, with the bundled zone name as a fallback.
 local function mapName(mapID)
     local map = C_Map.GetMapInfo(mapID)
     return map and map.name or addon.zoneNames[mapID]
 end
 
+-- Format the action with the player's faction-specific or shared destination.
 local function locationHint(entry, action)
     local location = entry and (entry[UnitFactionGroup("player")] or entry.location)
     if not location then
@@ -29,6 +33,9 @@ local function locationHint(entry, action)
     return ("%s in %s."):format(action, name)
 end
 
+-- Put the current zone first when listed, then sort by distance to each zone's center.
+-- Keep the route order for ties and zones without comparable coordinates.
+-- TODO: I think this can be improved, or even consider cost from current position?
 local function orderZones(zones)
     local playerMap = C_Map.GetBestMapForUnit("player")
     local playerPosition = playerMap and C_Map.GetPlayerMapPosition(playerMap, "player")
@@ -65,9 +72,10 @@ local function orderZones(zones)
     return ordered
 end
 
+-- Add up to MAX_ZONES destinations from the faction-specific or shared zone list.
 local function showZones(bracket)
     local zones = bracket.zones[UnitFactionGroup("player")] or bracket.zones
-    -- Some maps have no usable world coordinates, so keep the bundled order if needed.
+    -- Fall back to the route order if the player position is unavailable or sorting fails.
     local ok, ordered = pcall(orderZones, zones)
     if not ok then
         ordered = nil
@@ -78,6 +86,8 @@ local function showZones(bracket)
     end
 end
 
+-- Add a mining target, gathering zones, and the current or upcoming smelting step.
+-- The mining target can stop at the next smelting unlock so the player knows when to switch.
 local function showMining(bracket, skill, target, cap, smelting)
     local step
     for _, option in ipairs(smelting) do
@@ -99,11 +109,15 @@ local function showMining(bracket, skill, target, cap, smelting)
     elseif skill < step[1] then
         GameTooltip:AddLine(("Smelt %s unlocks at %d."):format(step[3], step[1]), 0.8, 0.8, 0.8)
     else
+        -- TODO: Show where to learn an unlearned smelting recipe, such as Smelt Gold
+        -- at 155 Mining. Use a verified trainer location for the player's faction.
         GameTooltip:AddLine(("Or smelt %s to %d at a forge."):format(step[3], math.min(step[2], cap)),
             0.8, 0.8, 0.8)
     end
 end
 
+-- Match the suggested recipes by name in the player's own crafting window.
+-- Prefer a learned match when multiple recipes share a name.
 local function findRecipes(name, alternativeName)
     local trade = C_TradeSkillUI
     if not trade or not trade.GetAllRecipeIDs or not trade.GetRecipeInfo
@@ -133,6 +147,8 @@ local function findRecipes(name, alternativeName)
     return primary, alternative
 end
 
+-- Add the crafting recommendation and any available alternative or rod hint.
+-- Check recipe knowledge and show acquisition hints inside the crafting window.
 local function showCrafting(bracket, skill, target, inCraftingPage)
     local name, alternative = bracket[2], bracket.alternative
     if alternative and alternative.from and skill < alternative.from then
@@ -170,6 +186,8 @@ local function showCrafting(bracket, skill, target, inCraftingPage)
     end
 end
 
+-- Show the hint for the hovered skill bar. The cap is the current trained rank's
+-- limit. At that cap, show where to unlock the next rank until the player reaches MAX_SKILL.
 local function showHint(bar, id, name, skill, cap, inCraftingPage)
     local route = addon.routes[id]
     if not route or not skill or not cap or skill < 1 or cap < 1 then
@@ -210,12 +228,15 @@ local function showHint(bar, id, name, skill, cap, inCraftingPage)
     GameTooltip:Show()
 end
 
+-- Hide the tooltip only if the bar still owns it.
 local function hideHint(bar)
     if GameTooltip:GetOwner() == bar then
         GameTooltip:Hide()
     end
 end
 
+-- Hook each bar once. Read the latest skill on hover and hide the hint when the
+-- cursor leaves or the bar is hidden.
 local function hookBar(bar, readSkill)
     if not bar or hooked[bar] then
         return
@@ -229,6 +250,7 @@ local function hookBar(bar, readSkill)
     hooked[bar] = true
 end
 
+-- Read the profession ID, name, skill, and trained cap for a slot on the overview page.
 local function readBookSkill(index)
     local profession = select(index, GetProfessions())
     if not profession then
@@ -238,6 +260,8 @@ local function readBookSkill(index)
     return id, name, rank, cap
 end
 
+-- Read the same values for the open crafting window. Use the parent profession
+-- ID when available and pass true so showHint can check recipes on this page.
 local function readCraftingSkill()
     local info = Professions.GetProfessionInfo()
     if info then
@@ -245,6 +269,7 @@ local function readCraftingSkill()
     end
 end
 
+-- Find the skill bars on the professions overview and in the crafting window.
 local function hookProfessions()
     local frame = ProfessionsFrame
     local book = frame and frame.BookPage or ProfessionsBookFrame
