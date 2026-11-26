@@ -36,9 +36,7 @@ end
 -- Put the current zone first when listed, then sort by straight-line distance
 -- from the player's position to the center of each zone.
 -- Keep the route order for ties and zones without comparable coordinates.
--- TODO: Consider flight path travel times. For example, Alliance players in
--- Ironforge may find The Hinterlands easier to reach via Aerie Peak even
--- though Badlands ranks closer by straight-line distance.
+-- TODO: Consider flight path availability and travel times when ranking zones.
 local function orderZones(zones)
     local playerMap = C_Map.GetBestMapForUnit("player")
     local playerPosition = playerMap and C_Map.GetPlayerMapPosition(playerMap, "player")
