@@ -33,9 +33,12 @@ local function locationHint(entry, action)
     return ("%s in %s."):format(action, name)
 end
 
--- Put the current zone first when listed, then sort by distance to each zone's center.
+-- Put the current zone first when listed, then sort by straight-line distance
+-- from the player's position to the center of each zone.
 -- Keep the route order for ties and zones without comparable coordinates.
--- TODO: I think this can be improved, or even consider cost from current position?
+-- TODO: Consider flight path travel times. For example, Alliance players in
+-- Ironforge may find The Hinterlands easier to reach via Aerie Peak even
+-- though Badlands ranks closer by straight-line distance.
 local function orderZones(zones)
     local playerMap = C_Map.GetBestMapForUnit("player")
     local playerPosition = playerMap and C_Map.GetPlayerMapPosition(playerMap, "player")
