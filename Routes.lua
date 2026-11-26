@@ -34,73 +34,161 @@ addon.zoneNames = {
     [hyjal] = "Mount Hyjal", [zephras] = "Zephras Isle", [riverglades] = "Riverglades",
 }
 
-local startingZones = {
-    Alliance = { elwynn, dunMorogh, teldrassil, zephras },
-    Horde = { durotar, mulgore, tirisfal, zephras },
-    zephras,
-}
+local startingZones = { zephras, elwynn, dunMorogh, teldrassil, durotar, mulgore, tirisfal }
 
-local dwarvenDistrict = { stormwind, "Dwarven District" }
 local mageQuarter = { stormwind, "Mage Quarter" }
 local oldTown = { stormwind, "Old Town" }
-local valleyOfHonor = { orgrimmar, "Valley of Honor" }
 local theDrag = { orgrimmar, "The Drag" }
-local theGreatForge = { ironforge, "The Great Forge" }
-local tinkerTown = { ironforge, "Tinker Town" }
-local craftsmensTerrace = { darnassus, "Craftsmen's Terrace" }
 local bootyBay = { stranglethorn, "Booty Bay" }
 local gadgetzan = { tanaris, "Gadgetzan" }
 local theramore = { dustwallow, "Theramore Isle" }
 local hammerfall = { arathi, "Hammerfall" }
+local geofram = { ironforge, "The Great Forge", npc = "Geofram Bouldertoe" }
+local springspindle = { ironforge, "Tinker Town", npc = "Springspindle Fizzlegear" }
 local magnusFrostwake = {
     action = "Buy the plans from Magnus Frostwake", location = { western, "Caer Darrow" },
 }
 local firstAidManuals = {
     Alliance = { arathi, "Stromgarde Keep" }, Horde = { dustwallow, "Brackenwall Village" },
 }
+local firstAidTrainers = {
+    Alliance = { stormwind, "Cathedral Square", npc = "Shaina Fuller" },
+    Horde = { orgrimmar, "Valley of Spirits", npc = "Arnok" },
+}
+local cookingTrainers = {
+    Alliance = { stormwind, "Old Town", npc = "Stephen Ryback" },
+    Horde = { orgrimmar, "The Drag", npc = "Zamja" },
+}
 
--- One suggested destination per faction and current rank cap.
+-- Destinations must teach the next rank. When listing several, put the default first.
 addon.training = {
-    [186] = { allRanks = { Alliance = dwarvenDistrict, Horde = valleyOfHonor } },
-    [182] = { allRanks = { Alliance = mageQuarter, Horde = theDrag } },
-    [393] = { allRanks = { Alliance = oldTown, Horde = theDrag } },
+    [186] = { -- Mining
+        allRanks = { locations = {
+            Alliance = {
+                { stormwind, "Dwarven District", npc = "Gelman Stonehand" },
+                geofram,
+                { loch, "Thelsamar", npc = "Brock Stoneseeker" },
+            },
+            Horde = {
+                { orgrimmar, "Valley of Honor", npc = "Makaru" },
+                { thunderBluff, npc = "Brek Stonehoof" },
+                { undercity, "War Quarter", npc = "Brom Killian" },
+            },
+        } },
+    },
+    [182] = { -- Herbalism
+        allRanks = { locations = {
+            Alliance = {
+                { stormwind, "Mage Quarter", npc = "Tannysa" },
+                { ironforge, "The Great Forge", npc = "Reyna Stonebranch" },
+                { darnassus, "The Temple Gardens", npc = "Firodren Mooncaller" },
+            },
+            Horde = {
+                { orgrimmar, "The Drag", npc = "Jandi" },
+                { thunderBluff, "Middle Rise", npc = "Komin Winterhoof" },
+                { undercity, "The Apothecarium", npc = "Martha Alliestar" },
+            },
+        } },
+    },
+    [393] = { -- Skinning
+        allRanks = { locations = {
+            Alliance = {
+                { stormwind, "Old Town", npc = "Maris Granger" },
+                { ironforge, "The Great Forge", npc = "Balthus Stoneflayer" },
+                { darnassus, "Craftsmen's Terrace", npc = "Eladriel" },
+            },
+            Horde = {
+                { orgrimmar, "The Drag", npc = "Thuwd" },
+                { thunderBluff, npc = "Mooranta" },
+                { undercity, "Rogues' Quarter", npc = "Killian Hagey" },
+            },
+        } },
+    },
     [171] = { -- Alchemy
-        [75] = { Alliance = mageQuarter, Horde = theDrag },
-        [150] = { Alliance = craftsmensTerrace, Horde = { undercity, "The Apothecarium" } },
-        [225] = { Alliance = { feralas, "Feathermoon Stronghold" }, Horde = { swampOfSorrows, "Stonard" } },
+        [75] = {
+            Alliance = { stormwind, "Mage Quarter", npc = "Lilyssia Nightbreeze" },
+            Horde = { orgrimmar, "The Drag", npc = "Yelmak" },
+        },
+        [150] = {
+            Alliance = { darnassus, "Craftsmen's Terrace", npc = "Ainethil" },
+            Horde = { undercity, "The Apothecarium", npc = "Doctor Herbert Halsey" },
+        },
+        [225] = {
+            Alliance = { feralas, "Feathermoon Stronghold", npc = "Kylanna Windwhisper" },
+            Horde = { swampOfSorrows, "Stonard", npc = "Rogvar" },
+        },
     },
     [164] = { -- Blacksmithing
-        [75] = { Alliance = dwarvenDistrict, Horde = valleyOfHonor },
-        [150] = { Alliance = theGreatForge, Horde = valleyOfHonor },
-        [225] = { location = bootyBay },
+        [75] = {
+            Alliance = { stormwind, "Dwarven District", npc = "Therum Deepforge" },
+            Horde = { orgrimmar, "Valley of Honor", npc = "Snarl" },
+        },
+        [150] = {
+            Alliance = { ironforge, "The Great Forge", npc = "Bengus Deepforge" },
+            Horde = { orgrimmar, "Valley of Honor", npc = "Saru Steelfury" },
+        },
+        [225] = { location = { stranglethorn, "Booty Bay", npc = "Brikk Keencraft" } },
     },
     [333] = { -- Enchanting
-        [75] = { Alliance = mageQuarter, Horde = theDrag },
-        [150] = { Alliance = { elwynn, "Tower of Azora" }, Horde = { stonetalon, "Sun Rock Retreat" } },
-        [225] = { action = "Train the next rank from Annora", location = { badlands, "Uldaman" } },
+        [75] = {
+            Alliance = { stormwind, "The Canals", npc = "Lucan Cordell" },
+            Horde = { orgrimmar, "The Drag", npc = "Godan" },
+        },
+        [150] = {
+            Alliance = { elwynn, "Tower of Azora", npc = "Kitta Firewind" },
+            Horde = { stonetalon, "Sun Rock Retreat", npc = "Hgarth" },
+        },
+        [225] = { location = { badlands, "Uldaman", npc = "Annora" } },
     },
     [202] = { -- Engineering
-        [75] = { Alliance = tinkerTown, Horde = valleyOfHonor },
-        [150] = { Alliance = tinkerTown, Horde = valleyOfHonor },
-        [225] = { location = gadgetzan },
+        [75] = {
+            Alliance = { ironforge, "Tinker Town", npc = "Trixie Quikswitch" },
+            Horde = { orgrimmar, "Valley of Honor", npc = "Nogg" },
+        },
+        [150] = {
+            Alliance = springspindle,
+            Horde = { orgrimmar, "Valley of Honor", npc = "Roxxik" },
+        },
+        [225] = { location = { tanaris, "Gadgetzan", npc = "Buzzek Bracketswing" } },
     },
     [165] = { -- Leatherworking
-        [75] = { Alliance = oldTown, Horde = theDrag },
-        [150] = { Alliance = craftsmensTerrace, Horde = { thunderBluff, "Middle Rise" } },
-        [225] = { Alliance = { hinterlands, "Aerie Peak" }, Horde = { feralas, "Camp Mojache" } },
+        [75] = {
+            Alliance = { stormwind, "Old Town", npc = "Simon Tanner" },
+            Horde = { orgrimmar, "The Drag", npc = "Karolek" },
+        },
+        [150] = {
+            Alliance = { darnassus, "Craftsmen's Terrace", npc = "Telonis" },
+            Horde = { thunderBluff, "Middle Rise", npc = "Una" },
+        },
+        [225] = {
+            Alliance = { hinterlands, "Aerie Peak", npc = "Drakk Stonehand" },
+            Horde = { feralas, "Camp Mojache", npc = "Hahrana Ironhide" },
+        },
     },
     [197] = { -- Tailoring
-        [75] = { Alliance = mageQuarter, Horde = theDrag },
-        [150] = { Alliance = mageQuarter, Horde = { undercity, "Magic Quarter" } },
-        [225] = { Alliance = theramore, Horde = { hillsbrad, "Tarren Mill" } },
+        [75] = {
+            Alliance = { stormwind, "Mage Quarter", npc = "Lawrence Schneider" },
+            Horde = { orgrimmar, "The Drag", npc = "Magar" },
+        },
+        [150] = {
+            Alliance = { stormwind, "Mage Quarter", npc = "Georgio Bolero" },
+            Horde = { undercity, "Magic Quarter", npc = "Josef Gregorian" },
+        },
+        [225] = {
+            Alliance = { dustwallow, "Theramore Isle", npc = "Timothy Worthington" },
+            Horde = { hillsbrad, "Tarren Mill", npc = "Daryl Stack" },
+        },
     },
     [356] = { -- Fishing
-        [75] = { Alliance = { stormwind, "Trade District" }, Horde = valleyOfHonor },
+        [75] = {
+            Alliance = { stormwind, "The Canals", npc = "Arnold Leland" },
+            Horde = { orgrimmar, "Valley of Honor", npc = "Lumak" },
+        },
         [150] = { action = "Buy Expert Fishing - The Bass and You", location = bootyBay },
         [225] = { action = "Complete Nat Pagle, Angler Extreme", location = { dustwallow } },
     },
     [185] = { -- Cooking
-        [75] = { Alliance = oldTown, Horde = theDrag },
+        [75] = cookingTrainers,
         [150] = {
             action = "Buy Expert Cookbook",
             Alliance = { ashenvale, "Silverwind Refuge" }, Horde = { desolace, "Shadowprey Village" },
@@ -108,7 +196,7 @@ addon.training = {
         [225] = { action = "Complete Clamlette Surprise", location = gadgetzan },
     },
     [129] = { -- First Aid
-        [75] = { Alliance = { stormwind, "Cathedral Square" }, Horde = { orgrimmar, "Valley of Spirits" } },
+        [75] = firstAidTrainers,
         [150] = {
             action = "Buy Expert First Aid - Under Wraps", Alliance = firstAidManuals.Alliance,
             Horde = firstAidManuals.Horde,
@@ -120,27 +208,30 @@ addon.training = {
 -- Verified destinations for common trainer recipes and a few recipes with special sources.
 -- Use the game's source for other recipes when it has one.
 addon.recipeSources = {
-    ["Lesser Mana Potion"] = addon.training[171][150],
+    ["Lesser Mana Potion"] = {
+        action = "Learn Lesser Mana Potion",
+        Alliance = { stormwind, "Mage Quarter", npc = "Lilyssia Nightbreeze" },
+        Horde = { orgrimmar, "The Drag", npc = "Yelmak" },
+    },
+    ["Flying Tiger Goggles"] = { Alliance = springspindle },
+    ["Heavy Blasting Powder"] = { Alliance = springspindle },
     ["Ebon Shiv"] = magnusFrostwake,
     ["Ornate Thorium Handaxe"] = magnusFrostwake,
     ["Bold Dirk"] = { action = "Buy the plans from Pexmit", location = { hyjal } },
-    ["Flying Tiger Goggles"] = addon.training[202][150],
-    ["Heavy Blasting Powder"] = addon.training[202][150],
-    ["Mageweave Bag"] = addon.training[197][150],
     ["Wizardweave Turban"] = { action = "Look for the pattern at the auction house" },
     ["Minor Wizard Oil"] = { action = "Buy the formula", Alliance = mageQuarter, Horde = theDrag },
-    ["Heavy Linen Bandage"] = addon.training[129][75],
-    ["Wool Bandage"] = addon.training[129][75],
-    ["Heavy Wool Bandage"] = addon.training[129][75],
-    ["Silk Bandage"] = addon.training[129][75],
+    ["Heavy Linen Bandage"] = firstAidTrainers,
+    ["Wool Bandage"] = firstAidTrainers,
+    ["Heavy Wool Bandage"] = firstAidTrainers,
+    ["Silk Bandage"] = firstAidTrainers,
     ["Heavy Silk Bandage"] = {
         action = "Buy the manual", Alliance = firstAidManuals.Alliance, Horde = firstAidManuals.Horde,
     },
     ["Mageweave Bandage"] = {
         action = "Buy the manual", Alliance = firstAidManuals.Alliance, Horde = firstAidManuals.Horde,
     },
-    ["Coyote Steak"] = addon.training[185][75],
-    ["Dry Pork Ribs"] = addon.training[185][75],
+    ["Coyote Steak"] = cookingTrainers,
+    ["Dry Pork Ribs"] = cookingTrainers,
     ["Curiously Tasty Omelet"] = { action = "Buy the recipe", Alliance = oldTown, Horde = hammerfall },
     ["Roast Raptor"] = { action = "Buy the recipe", Alliance = { arathi, "Refuge Pointe" }, Horde = hammerfall },
     ["Tender Wolf Steak"] = { action = "Buy the recipe", location = gadgetzan },
@@ -150,14 +241,14 @@ addon.recipeSources = {
 -- The next entry's minimum is the current bracket's target.
 addon.routes = {
     [186] = { -- Mining
-        -- Recommended smelting route. Endpoints below the gray threshold are recipe switches.
+        -- Recommended start and end for each bar. A recipe may be learnable earlier.
         smelting = {
             { 1, 65, "Copper" },
             { 65, 75, "Tin" },
             { 75, 100, "Bronze" },
             { 100, 125, "Silver" },
             { 125, 140, "Iron" },
-            { 155, 185, "Gold" },
+            { 155, 185, "Gold", trainers = { Alliance = geofram } },
         },
         { 1, "Copper Vein", zones = { zephras, mulgore, barrens, dunMorogh, elwynn } },
         { 65, "Tin Vein", zones = { redridge, ashenvale, barrens, loch, wetlands } },
@@ -169,12 +260,8 @@ addon.routes = {
     [182] = { -- Herbalism
         gatherAction = "Gather ",
         { 1, "Peacebloom / Silverleaf", zones = startingZones },
-        { 70, "Mageroyal / Briarthorn", zones = {
-            Alliance = { darkshore, loch }, Horde = { barrens, silverpine }, darkshore, silverpine,
-        } },
-        { 115, "Wild Steelbloom / Bruiseweed", zones = {
-            Alliance = { wetlands, hillsbrad, stonetalon }, Horde = { hillsbrad, stonetalon }, hillsbrad, stonetalon,
-        } },
+        { 70, "Mageroyal / Briarthorn", zones = { darkshore, silverpine, loch, barrens } },
+        { 115, "Wild Steelbloom / Bruiseweed", zones = { hillsbrad, stonetalon, wetlands } },
         { 170, "Goldthorn / Fadeleaf", zones = { arathi, stranglethorn } },
         { 205, "Firebloom", zones = { tanaris, searing } },
         { 230, "Sungrass", zones = { hinterlands, feralas } },
@@ -183,19 +270,10 @@ addon.routes = {
     [393] = { -- Skinning
         gatherAction = "Skin ",
         { 1, "starter-zone beasts", zones = startingZones },
-        { 75, "level 16-17 beasts", zones = {
-            Alliance = { loch }, Horde = { barrens }, barrens, loch,
-        } },
-        { 125, "level 25 beasts", zones = {
-            Alliance = { wetlands, hillsbrad }, Horde = { hillsbrad, wetlands }, hillsbrad, wetlands,
-        } },
-        { 150, "level 30 beasts", zones = {
-            Alliance = { arathi, thousand }, Horde = { thousand, arathi }, arathi, thousand,
-        } },
-        { 185, "level 37 beasts", zones = {
-            Alliance = { stranglethorn, badlands, dustwallow }, Horde = { dustwallow, badlands, stranglethorn },
-            stranglethorn, badlands, dustwallow,
-        } },
+        { 75, "level 16-17 beasts", zones = { barrens, loch } },
+        { 125, "level 25 beasts", zones = { hillsbrad, wetlands } },
+        { 150, "level 30 beasts", zones = { arathi, thousand } },
+        { 185, "level 37 beasts", zones = { stranglethorn, badlands, dustwallow } },
         { 225, "level 45 beasts", zones = { tanaris, feralas } },
         { 250, "level 50 beasts", zones = { ungoro, felwood } },
         { 275, "level 55 beasts", zones = { western, winterspring } },

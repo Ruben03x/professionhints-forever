@@ -1,6 +1,5 @@
 local _, addon = ...
-local MAX_SKILL, MAX_ZONES = 300, 3
-local hooked = {}
+local MAX_SKILL = 300
 
 -- Find the active row in a profession's route. The next row's starting skill is
 -- the target. The last row targets MAX_SKILL.
@@ -17,20 +16,6 @@ end
 local function mapName(mapID)
     local map = C_Map.GetMapInfo(mapID)
     return map and map.name or addon.zoneNames[mapID]
-end
-
--- Format the action with the player's faction-specific or shared destination.
-local function locationHint(entry, action)
-    local location = entry and (entry[UnitFactionGroup("player")] or entry.location)
-    if not location then
-        return action .. "."
-    end
-
-    local name = mapName(location[1])
-    if location[2] then
-        name = location[2] .. ", " .. name
-    end
-    return ("%s in %s."):format(action, name)
 end
 
 -- Put the current zone first when listed, then sort by straight-line distance
@@ -53,16 +38,18 @@ local function orderZones(zones)
     local ordered = {}
     for index, mapID in ipairs(zones) do
         local distance = math.huge
+        local otherContinent = false
         if mapID == playerMap then
             distance = 0
         else
             local continent, world = C_Map.GetWorldPosFromMapPos(mapID, center)
+            otherContinent = continent ~= nil and continent ~= playerContinent
             if world and continent == playerContinent then
                 local x, y = world:GetXY()
                 distance = (x - px) ^ 2 + (y - py) ^ 2
             end
         end
-        ordered[index] = { mapID = mapID, index = index, distance = distance }
+        ordered[index] = { mapID = mapID, index = index, distance = distance, otherContinent = otherContinent }
     end
     table.sort(ordered, function(a, b)
         if a.distance == b.distance then
@@ -73,47 +60,104 @@ local function orderZones(zones)
     return ordered
 end
 
--- Add up to MAX_ZONES destinations from the faction-specific or shared zone list.
+-- Prefer a trainer on the player's map even when world coordinates are unavailable.
+-- Otherwise rank the listed destinations by zone distance, with the first as a fallback.
+local function nearestLocation(locations)
+    local playerMap = C_Map.GetBestMapForUnit("player")
+    local maps = {}
+    for index, location in ipairs(locations) do
+        local mapID = location[1]
+        if mapID == playerMap then
+            return location
+        end
+        maps[index] = mapID
+    end
+
+    local ok, ordered = pcall(orderZones, maps)
+    local nearest = ok and ordered and ordered[1]
+    return locations[nearest and nearest.index or 1]
+end
+
+-- Use a single destination for fixed sources and rank eligible trainers when listed.
+local function locationHint(entry, action)
+    if not entry then
+        return action .. "."
+    end
+
+    local faction = UnitFactionGroup("player")
+    local location = entry[faction] or entry.location
+    local locations = entry.locations and entry.locations[faction]
+    if locations then
+        location = nearestLocation(locations) or location
+    end
+    action = action or entry.action
+    if not location then
+        return action and (action .. ".")
+    end
+
+    action = action or (location.npc and "Learn it" or "Learn it from a trainer")
+    if location.npc then
+        action = action .. " with " .. location.npc
+    end
+    local name = mapName(location[1])
+    if location[2] then
+        name = location[2] .. ", " .. name
+    end
+    return ("%s in %s."):format(action, name)
+end
+
+-- Add destinations from the shared zone list for this skill bracket.
 local function showZones(bracket)
-    local zones = bracket.zones[UnitFactionGroup("player")] or bracket.zones
+    local maxZones = 3
+    local zones = bracket.zones
     -- Fall back to the route order if the player position is unavailable or sorting fails.
     local ok, ordered = pcall(orderZones, zones)
     if not ok then
         ordered = nil
     end
-    for index = 1, math.min(#zones, MAX_ZONES) do
-        local mapID = ordered and ordered[index].mapID or zones[index]
-        GameTooltip:AddLine(mapName(mapID), 0.92, 0.92, 0.92)
+    for index = 1, math.min(#zones, maxZones) do
+        local zone = ordered and ordered[index]
+        local name = mapName(zone and zone.mapID or zones[index])
+        if zone and zone.otherContinent then
+            name = name .. " (other continent)"
+        end
+        GameTooltip:AddLine(name, 0.92, 0.92, 0.92)
     end
 end
 
 -- Add a mining target, gathering zones, and the current or upcoming smelting step.
--- The mining target can stop at the next smelting unlock so the player knows when to switch.
+-- The mining target can stop at the next recommended smelting step.
 local function showMining(bracket, skill, target, cap, smelting)
-    local step
+    local switchSkill, smeltTo, barName, trainers
     for _, option in ipairs(smelting) do
-        if skill < option[2] then
-            step = option
+        local stepTarget = option[2]
+        if skill < stepTarget then
+            switchSkill, smeltTo, barName, trainers = option[1], stepTarget, option[3], option.trainers
             break
         end
     end
 
     local mineTo = math.min(target, cap)
-    if step and skill < step[1] then
-        mineTo = math.min(mineTo, step[1])
+    if switchSkill and skill < switchSkill then
+        mineTo = math.min(mineTo, switchSkill)
     end
     GameTooltip:AddLine(("Mine %s to %d"):format(bracket[2], mineTo), 1, 0.82, 0.37)
     showZones(bracket)
 
-    if not step then
+    if not switchSkill then
         GameTooltip:AddLine("Smelting skill-ups end at 185.", 0.8, 0.8, 0.8)
-    elseif skill < step[1] then
-        GameTooltip:AddLine(("Smelt %s unlocks at %d."):format(step[3], step[1]), 0.8, 0.8, 0.8)
+    elseif skill < switchSkill then
+        GameTooltip:AddLine(("Switch to smelting %s at %d."):format(barName, switchSkill), 0.8, 0.8, 0.8)
     else
-        -- TODO: Show where to learn an unlearned smelting recipe, such as Smelt Gold
-        -- at 155 Mining. Use a verified trainer location for the player's faction.
-        GameTooltip:AddLine(("Or smelt %s to %d at a forge."):format(step[3], math.min(step[2], cap)),
+        GameTooltip:AddLine(("Or smelt %s to %d at a forge."):format(barName, math.min(smeltTo, cap)),
             0.8, 0.8, 0.8)
+        local trainer = trainers and trainers[UnitFactionGroup("player")]
+        if trainer and trainer[1] == C_Map.GetBestMapForUnit("player") then
+            -- TODO: Check whether the player has learned the smelting recipe when the game can tell us.
+            local hint = ("If you haven't learned it, %s teaches Smelt %s in %s.")
+                :format(trainer.npc, barName, trainer[2])
+            GameTooltip:AddLine(hint, 0.8, 0.8, 0.8, true)
+        end
     end
 end
 
@@ -162,30 +206,37 @@ local function showCrafting(bracket, skill, target, inCraftingPage)
         GameTooltip:AddLine(("Make a %s if you need one."):format(bracket.rod), 0.8, 0.8, 0.8, true)
     end
 
-    local recipe, other
+    local recipe, alternativeRecipe
     if inCraftingPage then
-        recipe, other = findRecipes(name, alternative and alternative[1])
+        recipe, alternativeRecipe = findRecipes(name, alternative and alternative[1])
     end
 
-    local unlearned = recipe and recipe.learned == false
-    if unlearned then
+    local primaryUnlearned = recipe and recipe.learned == false
+    if primaryUnlearned then
         local entry = addon.recipeSources[name]
         local source
         if entry then
-            source = locationHint(entry, entry.action or "Learn it from a trainer")
-        elseif C_TradeSkillUI.GetRecipeSourceText then
+            source = locationHint(entry)
+        end
+        if not source and C_TradeSkillUI.GetRecipeSourceText then
             local sourceText = C_TradeSkillUI.GetRecipeSourceText(recipe.recipeID)
             source = sourceText and sourceText:match("[^\r\n]*%S[^\r\n]*")
         end
         GameTooltip:AddLine(source or "Recipe unlearned.", 0.8, 0.8, 0.8, true)
     end
 
-    local alternateLearned = other and other.learned
-    if alternative and (alternateLearned == true or (not unlearned and alternateLearned ~= false)) then
+    local alternativeLearned = alternativeRecipe and alternativeRecipe.learned
+    -- If the alternative's status is unknown, show it only when the primary
+    -- recipe isn't known to be unlearned. The overview doesn't check either recipe.
+    local showAlternative = alternative
+        and (alternativeLearned == true or (not primaryUnlearned and alternativeLearned ~= false))
+    if showAlternative then
         local note = alternative[2] and (" " .. alternative[2]) or ""
         GameTooltip:AddLine(("Alternative · %s%s."):format(alternative[1], note), 0.8, 0.8, 0.8, true)
     end
 end
+
+local rankAfterCap = { [75] = "Journeyman", [150] = "Expert", [225] = "Artisan" }
 
 -- Show the hint for the hovered skill bar. The cap is the current trained rank's
 -- limit. At that cap, show where to unlock the next rank until the player reaches MAX_SKILL.
@@ -211,7 +262,8 @@ local function showHint(bar, id, name, skill, cap, inCraftingPage)
     elseif skill >= cap then
         local training = addon.training[id]
         local entry = training[cap] or training.allRanks
-        local action = entry and entry.action
+        local rank = rankAfterCap[cap]
+        local action = (entry and entry.action) or (rank and ("Train %s %s"):format(rank, name))
         local hint = locationHint(entry, action or "Train the next rank")
         GameTooltip:AddLine(hint, 0.92, 0.92, 0.92, true)
     elseif route.smelting then
@@ -235,6 +287,8 @@ local function hideHint(bar)
         GameTooltip:Hide()
     end
 end
+
+local hooked = {}
 
 -- Hook each bar once. Read the latest skill on hover and hide the hint when the
 -- cursor leaves or the bar is hidden.

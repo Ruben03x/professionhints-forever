@@ -18,7 +18,7 @@ This is a work in progress. If you find a better recipe, skill breakpoint, gathe
 
 Extract the `ProfessionHintsForever` folder into `World of Warcraft/_forever_/Interface/AddOns`, so `ProfessionHintsForever.toc` is directly inside the addon folder. Enable **Profession Hints Forever** in WoW and open Professions.
 
-Mining shows a node, a skill target, and up to three zones. When smelting can grant skill, you also see a recommended bar to make and its own target. Smelt Iron can take you to 140, then mine to 155 to learn Smelt Gold. Gold can take you to 185. Switch back to mining for regular skill-ups from 185. Smelting targets are recommendations and can require multiple crafts per point.
+Mining shows a node, a skill target, and up to three zones. When smelting can grant skill, you also see a recommended bar to make and its own target. Smelt Iron can take you to 140, then mine to 155 to learn Smelt Gold. If you're Alliance and already in Ironforge, the tooltip points you to Geofram Bouldertoe for Smelt Gold. Gold can take you to 185. Switch back to mining for regular skill-ups from 185. The recommended switch to a bar can come after its recipe is learnable, and skill-ups can take multiple crafts per point.
 
 Herbalism, Skinning, and Fishing show what to gather, your next skill target and nearby zones. You can level Fishing in starter waters. At a skill cap, the tooltip gives a trainer, book vendor, or quest destination for your faction and includes the district or settlement where available.
 
@@ -26,11 +26,15 @@ Crafting shows a recommended recipe and an alternative where available. In your 
 
 ## Zone order
 
-Gathering tooltips sort suitable zones nearest first using straight-line distance to the zone center. Your current zone comes first if it fits the bracket. Zones on other continents or without coordinates follow the measurable ones in bundled order. If your position is unavailable, the tooltip uses the bundled order.
+See the [1–300 profession routes](docs/profession-routes.md) for every bundled skill bracket, gathering zone list, and rank-cap destination.
+
+Gathering tooltips use one zone list per skill bracket for both factions and sort suitable zones nearest first using straight-line distance to the zone center. Your current zone comes first if it fits the bracket. Zones on other continents or without coordinates follow the measurable ones in bundled order. The tooltip labels zones it can identify as being on another continent. If your position is unavailable, the tooltip uses the bundled order.
 
 ## Contribute a route
 
 Small updates are welcome. You can change a single recipe, add a gathering zone, or correct a vendor or trainer location.
+
+Update the matching table in the [profession routes reference](docs/profession-routes.md) when you change a route or trainer destination.
 
 1. Open [Routes.lua](Routes.lua) on GitHub, click the pencil icon, and follow the prompts to fork the repo. You can make the edit in your browser.
 2. Find the profession by its name in the comments under `addon.routes`. Edit an existing row or insert a row to add a new breakpoint. Keep rows in ascending skill order. The first number is the skill at which the hint starts. The next row sets the switch point, and the last row targets 300.
@@ -57,7 +61,7 @@ To suggest a gathering zone, edit the `zones` list for the relevant row. Use the
 { 65, "Tin Vein", zones = { redridge, ashenvale, barrens, loch, wetlands } },
 ```
 
-Recipe locations live in `addon.recipeSources`. Rank-cap destinations live in `addon.training`, where you can set separate locations for Alliance and Horde. For recipe changes, check that the recipe can be learned by the starting skill and can still give skill-ups through the bracket.
+Rank-cap destinations live in `addon.training`. Give each trainer an `npc` name and check that they teach the next rank. For Mining, Herbalism, and Skinning, the `locations` lists let the tooltip prefer a trainer in your current zone or suggest the nearest listed zone for your faction. Put the default trainer first for when map data is unavailable. Recipe-specific destinations live in `addon.recipeSources`. For recipe changes, check the source, the starting skill, and how far the recipe can give skill-ups.
 
 ### Test in WoW Forever
 
@@ -76,6 +80,7 @@ Routes checked against WoW Forever build 1.60.1.71091 and Forever guides on Nove
 - The Herbalism, Skinning, Fishing, and early crafting recommendations draw from [Icy Veins' Forever profession guides](https://www.icy-veins.com/wow-forever/). First Aid uses [Wowhead's bandage route](https://www.wowhead.com/forever/guide/professions/first-aid/overview).
 - [ForeverArtisan's leveling guides](https://foreverartisan.app/guides/) cover Engineering and supplement Alchemy, Leatherworking, and Tailoring after 225. [Hardcore Helper's Forever guides](https://www.hardcorehelper.com/forever/guides) cover Enchanting.
 - Rank destinations draw from [WoW Professions' Forever trainer guides](https://www.wow-professions.com/forever), [Warcraft Tavern's Forever trainer guide](https://www.warcrafttavern.com/forever/guides/profession-trainers/), and [Wowhead's Forever Fishing guide](https://www.wowhead.com/forever/guide/professions/fishing/overview-leveling).
+- Trainer and recipe references include the Wowhead Forever NPC pages for [Lilyssia Nightbreeze](https://www.wowhead.com/forever/npc=5499/lilyssia-nightbreeze#teaches-recipe), [Springspindle Fizzlegear](https://www.wowhead.com/forever/npc=5174/springspindle-fizzlegear), and [Geofram Bouldertoe](https://www.wowhead.com/forever/npc=4254/geofram-bouldertoe), plus the [ForeverDB listing for Yelmak](https://www.foreverdb.app/en/forever/npcs/3347/yelmak).
 - Recipe destinations draw from Forever entry data at [Bind on Forever](https://bindonforever.com/professions), [ForeverDB](https://www.foreverdb.app/), and [Azeroth Wiki](https://azeroth.wiki/forever/).
 
 ## License
