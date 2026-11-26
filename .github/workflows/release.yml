@@ -2,6 +2,7 @@ name: Package addon
 
 on:
   push:
+    branches: [main]
     tags: ['v*']
 
 permissions:
@@ -9,34 +10,67 @@ permissions:
 
 jobs:
   package:
+    if: ${{ !github.event.deleted }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
         with:
+          fetch-depth: 0
           persist-credentials: false
-      - name: Package addon and draft release
+      - name: Tag version, package addon, and draft release
         shell: python
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          import json
           import os
+          import re
           import subprocess
           from pathlib import Path
 
-          tag = os.environ["GITHUB_REF_NAME"]
           prefix = "## Version: "
           toc = Path("ProfessionHintsForever.toc").read_text(encoding="utf-8")
           version = next((line.removeprefix(prefix).strip()
                           for line in toc.splitlines() if line.startswith(prefix)), "")
-          if not version or tag != f"v{version}":
+          if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version):
+              raise SystemExit("ProfessionHintsForever.toc must specify a version like 0.1.4.")
+
+          tag = f"v{version}"
+          if os.environ["GITHUB_REF_TYPE"] == "tag" and os.environ["GITHUB_REF_NAME"] != tag:
               raise SystemExit("The tag must match the version in ProfessionHintsForever.toc.")
 
+          ref = f"refs/tags/{tag}"
+          commit = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+          tagged = subprocess.run(["git", "rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}"],
+                                  capture_output=True, text=True)
+          if tagged.returncode == 0 and tagged.stdout.strip() != commit:
+              print(f"{tag} already points to an earlier release commit. Bump the TOC version to release again.")
+              raise SystemExit(0)
+
+          release = subprocess.run(["gh", "release", "view", tag, "--json", "assets,isDraft"],
+                                   capture_output=True, text=True)
           archive = f"ProfessionHintsForever-{version}.zip"
+          if release.returncode == 0:
+              existing = json.loads(release.stdout)
+              if not existing["isDraft"] or any(asset["name"] == archive for asset in existing["assets"]):
+                  print(f"{tag} has already been packaged.")
+                  raise SystemExit(0)
+
           subprocess.run([
               "git", "archive", "--format=zip", "--prefix=ProfessionHintsForever/",
               f"--output={archive}", "HEAD", "ProfessionHintsForever.lua", "ProfessionHintsForever.toc",
               "Routes.lua", "LICENSE", "NOTICE",
           ], check=True)
+          if tagged.returncode != 0:
+              subprocess.run([
+                  "gh", "api", "--method", "POST", "repos/{owner}/{repo}/git/refs",
+                  "-f", f"ref={ref}", "-f", f"sha={commit}",
+              ], check=True)
+
+          if release.returncode == 0:
+              subprocess.run(["gh", "release", "upload", tag, archive], check=True)
+              raise SystemExit(0)
+
           subprocess.run([
               "gh", "release", "create", tag, archive, "--verify-tag", "--draft",
               "--generate-notes", "--title", f"Profession Hints Forever {tag}",
