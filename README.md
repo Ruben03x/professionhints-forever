@@ -2,7 +2,7 @@
 
 Open Professions in WoW Forever and hover over a skill bar to see what to craft or gather next, where to gather and where to train when you hit a cap. It also works in the crafting window and covers all 12 professions from 1 to 300.
 
-This is a WIP, and any fixes, optimizations etc is appreciated.
+This is a work in progress. If you find a better recipe, skill breakpoint, gathering zone, or trainer location, [help improve a route](#contribute-a-route).
 
 ## In-game demos
 
@@ -27,6 +27,37 @@ Crafting shows a recommended recipe and an alternative where available. In your 
 ## Zone order
 
 Gathering tooltips sort suitable zones nearest first using straight-line distance to the zone center. Your current zone comes first if it fits the bracket. Zones on other continents or without coordinates follow the measurable ones in bundled order. If your position is unavailable, the tooltip uses the bundled order.
+
+## Contribute a route
+
+Small updates are welcome. You can change a single recipe, add a gathering zone, or correct a vendor or trainer location.
+
+1. Open [Routes.lua](Routes.lua) on GitHub, click the pencil icon, and follow the prompts to fork the repo. You can make the edit in your browser.
+2. Find the profession by its name in the comments under `addon.routes`. Edit an existing row or insert a row to add a new breakpoint. Keep rows in ascending skill order. The first number is the skill at which the hint starts. The next row sets the switch point, and the last row targets 300.
+3. Click **Propose changes** and open a pull request against `main`. Include the profession, affected skill range, what changed, and how you checked it. An in-game screenshot or a link to a WoW Forever source helps reviewers verify the change.
+
+### Route examples
+
+These two Alchemy rows recommend Lesser Mana Potion at 120 and switch to Mana Potion at 160. Use the exact English recipe name so the crafting window can match it.
+
+```lua
+{ 120, "Lesser Mana Potion" },
+{ 160, "Mana Potion" },
+```
+
+To suggest a gathering zone, edit the `zones` list for the relevant row. Use the zone names defined as Lua variables at the top of the file.
+
+```lua
+{ 65, "Tin Vein", zones = { redridge, ashenvale, barrens, loch, wetlands } },
+```
+
+Recipe locations live in `addon.recipeSources`. Rank-cap destinations live in `addon.training`, where you can set separate locations for Alliance and Horde. For recipe changes, check that the recipe can be learned by the starting skill and can still give skill-ups through the bracket.
+
+### Test in WoW Forever
+
+Copy `ProfessionHintsForever.toc`, `Routes.lua`, and `ProfessionHintsForever.lua` from your edited branch into `_forever_/Interface/AddOns/ProfessionHintsForever`. In game, run `/reload` and hover over the profession skill bar. If you have a character near a changed breakpoint, check both sides of the switch. For recipe changes, also check the profession's own crafting window. In your pull request, mention what you were able to test.
+
+You can also [open an issue](https://github.com/Ruben03x/professionhints-forever/issues/new) with the profession, your skill level, the current hint, and what you expected to see.
 
 ## Data sources
 
